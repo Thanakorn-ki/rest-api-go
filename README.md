@@ -1,1 +1,1 @@
-# rest-api-go
+# For example web-framework-gin
