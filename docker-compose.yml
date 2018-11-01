@@ -1,9 +1,7 @@
 version: "3.3"
 services:
   api:
-    build:
-      context: .
-      dockerfile: build-dev
+    build: build/dev/
     container_name: "use-case"
     ports:
       - 3000:3000
@@ -12,12 +10,13 @@ services:
     volumes:
       - ./:/go/src/github.com/salapao2136/rest-api-go
   db:
-    container_name: "db"
-    image: mysql:5.5.61
+    container_name: db
+    image: mysql:5.7
     environment:
       - MYSQL_ROOT_PASSWORD=root
       - MYSQL_DATABASE=seller
     volumes:
       - ./mysql:/var/lib/mysql
-    expose:
-      - 3306
+    ports:
+      - 3306:3306
+

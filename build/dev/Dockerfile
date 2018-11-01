@@ -1,8 +1,6 @@
 FROM golang:1.11-alpine3.8 AS builder 
 
-RUN mkdir -p /go/src/github.com/salapao2136/rest-api-go
-
-WORKDIR /go/src/github.com/salapao2136/rest-api-go
+WORKDIR $GOPATH/src/github.com/salapao2136/rest-api-go
 
 COPY . .
 # ====================================================== 

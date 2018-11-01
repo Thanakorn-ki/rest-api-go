@@ -6,7 +6,7 @@ import (
 )
 
 func Init() *gorm.DB {
-	db, err := gorm.Open("mysql", "root:root@/seller?charset=utf8")
+	db, err := gorm.Open("mysql", "root:root@tcp(db:3306)/seller?charset=utf8")
 
 	if err != nil {
 		panic(err)
