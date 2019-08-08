@@ -1,40 +1,30 @@
-FROM golang:1.7.3
+FROM golang:1.12.1-alpine3.9 AS based_builder
 
-WORKDIR /go/src/github.com/salapao2136/rest-api-go
+# Install git, curl and openssh
+RUN apk add --no-cache git curl openssh
 
-FROM golang:1.11-alpine3.8 AS builder 
+# Download go modules as pre-caches for derivative build
+WORKDIR /src/go
+COPY go.mod go.sum ./
+RUN go mod download
 
-# ====================================================== 
-# (1) Install dep 
-# ====================================================== 
-RUN apk add --no-cache git 
-RUN go get github.com/golang/dep/cmd/dep 
+# =============================================================================
+FROM based_builder AS builder
 
-# ====================================================== 
-# (2) Create workspace folder 
-# ====================================================== 
-RUN mkdir -p /go/src/github.com/salapao2136/rest-api-go 
-WORKDIR /go/src/github.com/salapao2136/rest-api-go 
+# Receive argument from command when building a service
+ARG service
 
-# ================================================================ 
-# (3) Copy Gopkg.toml Gopkg.lock and install library dependencies 
-# These layers will only be re-built when Gopkg files are updated 
-# ================================================================ 
-COPY Gopkg.lock Gopkg.toml /go/src/github.com/salapao2136/rest-api-go/ 
-RUN dep ensure -vendor-only 
+# Copy the code from the host and compile it
+WORKDIR /src/go
+COPY . ./
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix nocgo -o /app .
 
-# ====================================================== 
-# (4) Copy all project and build it 
-# This layer will be rebuilt when ever a file 
-# has changed in the project directory 
-# ====================================================== 
-COPY . /go/src/github.com/salapao2136/rest-api-go 
-RUN go build -o /bin/app 
+# =============================================================================
+FROM alpine:3.9.2
+RUN apk update && \
+   apk add curl ca-certificates && \
+   rm -rf /var/cache/apk/** && \
+   update-ca-certificates
 
-# ================================================================== 
-# (5) Build the final image based on executable from build image 
-# ================================================================== 
-FROM alpine3.8 
-COPY --from=builder /bin/app /bin/app 
-EXPOSE 8080 
-CMD ["/bin/app"]
+COPY --from=builder /app ./
+ENTRYPOINT ["./app"]
