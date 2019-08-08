@@ -1,19 +1,15 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/salapao2136/rest-api-go/configs"
-	"github.com/salapao2136/rest-api-go/models"
-	"github.com/salapao2136/rest-api-go/product"
+	"net/http"
+
+	"github.com/labstack/echo"
 )
 
 func main() {
-	conn := configs.Init()
-	conn.AutoMigrate(&models.Product{})
-	defer conn.Close()
-	repoProduct := product.NewRepoProduct(conn)
-	ucaseProduct := product.NewUcaseProduct(repoProduct)
-	r := gin.Default()
-	product.ProductRegister(r, ucaseProduct)
-	r.Run(":3000")
+	e := echo.New()
+	e.GET("/", func(c echo.Context) error {
+		return c.String(http.StatusOK, "Hello, World!")
+	})
+	e.Logger.Fatal(e.Start(":1323"))
 }
